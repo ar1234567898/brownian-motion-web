@@ -7,22 +7,65 @@
   </head>
   <body>
     <div class="motion-menu">
+      <label style="margin-top: 8px">
+        <input type="checkbox" id="themeToggle" />
+        Темна тема
+      </label>
       <label for="numParticles">Кількість частинок:</label>
       <input
         class="numParticles"
         type="range"
         min="100"
-        max="2000"
-        value="1500"
+        max="1000"
+        value="500"
       />
-        <label for="temperature">Температура:</label>
+      <label for="temperature">Температура:</label>
+      <input class="temperature" type="range" min="0" max="1000" value="50" />
+
+      <div class="mass-menu">
+        <label style="font-weight: 500">Маса нової частинки:</label><br />
+        <label style="margin-right: 12px">
+          <input type="radio" name="mass" value="" checked />
+          Ніяка(Поштовх)
+        </label>
+        <label style="margin-right: 12px">
+          <input type="radio" name="mass" value="3" />
+          Мала
+        </label>
+        <label style="margin-right: 12px">
+          <input type="radio" name="mass" value="6" />
+          Середня
+        </label>
+        <label>
+          <input type="radio" name="mass" value="10" />
+          Велика
+        </label>
+      </div>
+      <div class="push-menu" style="display: none">
+        <label for="pushStrength">Сила поштовху:</label>
         <input
-          class="temperature"
+          id="pushStrength"
           type="range"
-          min="0"
-          max="1000"
-          value="50"
+          min="-3"
+          max="3"
+          step="0.05"
+          value="0.75"
         />
+        <span id="pushStrengthValue">0.75</span>
+        <br />
+        <label for="pushRadius">Радіус поштовху:</label>
+        <input
+          id="pushRadius"
+          type="range"
+          min="20"
+          max="200"
+          step="1"
+          value="80"
+        />
+        <span id="pushRadiusValue">80</span>
+      </div>
+
+      <button class="pause-btn">⏸ Пауза</button>
     </div>
     <div class="content">
       <h1>Броунівський Рух</h1>
@@ -50,7 +93,10 @@
         </p>
       </section>
     </div>
-    <button class="show-content-btn" style="display:none;">Показати інформацію</button>
+    <button class="show-content-btn" style="display: none">
+      Показати інформацію
+    </button>
+
     <script src="scripts/brownian.js"></script>
   </body>
 </html>
