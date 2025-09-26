@@ -2,19 +2,21 @@ const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 document.body.appendChild(canvas);
 
+const numOfParticlesInput = document.querySelector('.numParticles');
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const particles = [];
-const numParticles = 100;
+let numParticles = 7500; // Default value
+let particles = [];
 
 class Particle {
     constructor(x, y) {
         this.x = x;
         this.y = y;
         this.size = Math.random() * 5 + 1;
-        this.speedX = (Math.random() - 0.5) * 2;
-        this.speedY = (Math.random() - 0.5) * 2;
+        this.speedX = (Math.random() - 0.5) * 30;
+        this.speedY = (Math.random() - 0.5) * 5;
     }
 
     update() {
@@ -34,6 +36,7 @@ class Particle {
 }
 
 function init() {
+    particles = [];
     for (let i = 0; i < numParticles; i++) {
         particles.push(new Particle(Math.random() * canvas.width, Math.random() * canvas.height));
     }
@@ -51,7 +54,17 @@ function animate() {
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    init();
 });
+
+// Listen for input changes
+if (numOfParticlesInput) {
+    numOfParticlesInput.value = numParticles;
+    numOfParticlesInput.addEventListener('input', (e) => {
+        numParticles = parseInt(e.target.value, 10) || 0;
+        init();
+    });
+}
 
 init();
 animate();

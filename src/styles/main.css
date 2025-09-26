@@ -1,15 +1,29 @@
-body {
+body, html {
     margin: 0;
     padding: 0;
+    height: 100%;
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
 }
 
 canvas {
-    display: block;
-    margin: 20px auto;
-    border: 1px solid #ccc;
-    background-color: #ffffff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+    background: rgba(255,255,255,0.85);
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1);
 }
 
 h1 {
@@ -23,3 +37,4 @@ h1 {
     font-size: 1.2em;
     color: #666;
 }
+

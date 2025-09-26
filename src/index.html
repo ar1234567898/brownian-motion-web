@@ -1,14 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ua">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brownian Motion Simulation</title>
+    <title>Brownian Motion</title>
     <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
-    <h1>Brownian Motion Simulation</h1>
-    <canvas id="simulationCanvas"></canvas>
+    <div class="content">
+        <div class="motion-menu">
+            <label for="numParticles">Кількість частинок:</label>
+            <input class="numParticles" type="range" min="100" max="10000" value="7500">
+        </div>
+        <h1>Броунівський Рух</h1>
+        <section>
+            <h2>Що таке броунівський рух?</h2>
+            <p>
+                Броунівський рух - це випадковий рух частинок, що знаходяться в рідині (рідина або газ), внаслідок їх зіткнення з швидко рухомими молекулами в рідині.
+            </p>
+        </section>
+        <section>
+            <h2>Історія</h2>
+            <p>
+                Вперше спостережений ботаніком Робертом Броуном у 1827 році, броунівський рух став ключовим доказом існування атомів і молекул.
+            </p>
+        </section>
+        <section>
+            <h2>Застосування</h2>
+            <p>
+                Броунівський рух є фундаментальним у фізиці, хімії та фінансах, допомагаючи пояснити дифузію, коливання фондового ринку та інше.
+            </p>
+        </section>
+    </div>
     <script src="scripts/brownian.js"></script>
 </body>
 </html>
