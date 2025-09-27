@@ -2,6 +2,8 @@ const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 document.body.appendChild(canvas);
 
+let bonds = []; // global list of bonds
+
 const numOfParticlesInput = document.querySelector('.numParticles');
 const temperatureInput = document.querySelector('.temperature');
 const massInputs = document.querySelectorAll('.mass-menu input[name="mass"]');
@@ -10,6 +12,27 @@ const pushStrengthInput = document.getElementById('pushStrength');
 const pushStrengthValue = document.getElementById('pushStrengthValue');
 const pushRadiusInput = document.getElementById('pushRadius');
 const pushRadiusValue = document.getElementById('pushRadiusValue');
+
+document.addEventListener('DOMContentLoaded', () => {
+    const content = document.querySelector('.content');
+    const hideBtn = document.querySelector('.hide-content-btn');
+    const showBtn = document.querySelector('.show-content-btn');
+
+    if (hideBtn && showBtn && content) {
+        hideBtn.addEventListener('click', () => {
+            content.classList.add('hidden');
+            setTimeout(() => {
+                showBtn.style.display = 'block';
+            }, 400);
+        });
+
+        showBtn.addEventListener('click', () => {
+            content.classList.remove('hidden');
+            showBtn.style.display = 'none';
+        });
+    }
+});
+
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -36,6 +59,103 @@ function playCollisionSound() {
     };
 }
 
+const environmentSelect = document.getElementById('environment');
+
+let environment = 'none';
+let bondSettings = {
+    none:   { maxBonds: 0, bondDistance: 0, bondStrength: 0 },
+    gas:    { maxBonds: 1, bondDistance: 60,  bondStrength: 0.01 },
+    liquid: { maxBonds: 3, bondDistance: 70, bondStrength: 0.05 },
+    solid:  { maxBonds: 7, bondDistance: 120, bondStrength: 0.1 }
+};
+
+function cleanupBonds() {
+    const settings = bondSettings[environment];
+    const breakFactor = 1.5; // bond breaks if stretched more than 1.5× its rest length
+
+    bonds = bonds.filter(bond => {
+        // Remove if particle is gone
+        if (!particles.includes(bond.a) || !particles.includes(bond.b)) return false;
+
+        // Check distance
+        const dx = bond.b.x - bond.a.x;
+        const dy = bond.b.y - bond.a.y;
+        const dist = Math.hypot(dx, dy);
+
+        // Keep only if not overstretched
+        return dist <= bond.rest * breakFactor;
+    });
+}
+
+
+if (environmentSelect) {
+    environmentSelect.addEventListener('change', e => {
+        environment = e.target.value;
+        makeBonds();
+    });
+}
+
+function enforceSolidBonds() {
+    if (environment !== 'solid') return;
+
+    const tolerance = 0.1;   // bonds can stretch ±10%
+    const breakFactor = 1.3; // break if stretched >150%
+
+    bonds = bonds.filter(bond => {
+        const { a, b, rest } = bond;
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist === 0) return true;
+
+        // Break if overheated
+        if (dist > rest * breakFactor) {
+            return false;
+        }
+
+        // Allowed interval
+        const minDist = rest * (1 - tolerance);
+        const maxDist = rest * (1 + tolerance);
+
+        if (dist < minDist || dist > maxDist) {
+            // Push particles back into allowed zone
+            const diff = (dist - rest) / dist;
+            const offsetX = dx * 0.5 * diff;
+            const offsetY = dy * 0.5 * diff;
+
+            a.x += offsetX;
+            a.y += offsetY;
+            b.x -= offsetX;
+            b.y -= offsetY;
+        }
+
+        return true;
+    });
+}
+
+
+function drawBonds() {
+    if (environment === 'none') return;
+
+    ctx.lineWidth = 1;
+
+    bonds.forEach(bond => {
+        const { a, b, rest } = bond;
+
+        // fade opacity with distance compared to rest length
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const dist = Math.hypot(dx, dy);
+        let alpha = 1 - Math.min(dist / (rest * 1.5), 1);
+
+        ctx.strokeStyle = `rgba(200,200,200,${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+    });
+}
+
 let numParticles = numOfParticlesInput ? parseInt(numOfParticlesInput.value, 10) : 500;
 let temperature = temperatureInput ? parseInt(temperatureInput.value, 10) : 50;
 let particles = [];
@@ -49,6 +169,40 @@ const MASS_OPTIONS = [
 let selectedMass = null;
 let pushStrength = parseFloat(pushStrengthInput.value);
 let pushRadius = parseInt(pushRadiusInput.value, 10);
+
+function makeBonds() {
+    bonds = [];
+    const settings = bondSettings[environment];
+    if (settings.maxBonds === 0) return;
+
+    for (let i = 0; i < particles.length; i++) {
+        const p1 = particles[i];
+        let neighbors = [];
+
+        for (let j = 0; j < particles.length; j++) {
+            if (i === j) continue;
+            const p2 = particles[j];
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const dist = Math.hypot(dx, dy);
+
+            if (dist < settings.bondDistance) {
+                neighbors.push({ p: p2, d: dist });
+            }
+        }
+
+        neighbors.sort((a, b) => a.d - b.d);
+        neighbors = neighbors.slice(0, settings.maxBonds);
+
+        neighbors.forEach(n => {
+            // prevent duplicate bonds
+            if (!bonds.find(b => (b.a === n.p && b.b === p1) || (b.a === p1 && b.b === n.p))) {
+                bonds.push({ a: p1, b: n.p, rest: n.d });
+            }
+        });
+    }
+}
+
 
 // Вибір маси через меню
 if (massInputs.length) {
@@ -221,16 +375,21 @@ canvas.addEventListener('mousemove', (e) => {
 function animate() {
     if (paused) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     handleCollisions();
     if (mouseDown && selectedMass === null) {
         pushParticlesFromCursor(mouseX, mouseY);
     }
+
     particles.forEach(particle => {
         particle.update();
         particle.draw();
     });
 
-    // ОНОВЛЕННЯ температури та повзунка
+    cleanupBonds();
+    drawBonds();       // still draw lines
+    enforceSolidBonds(); // keep solid bonds at fixed length
+
     const actualTemperature = calculateTemperature();
     temperature = actualTemperature;
     if (temperatureInput) {
@@ -239,6 +398,7 @@ function animate() {
 
     requestAnimationFrame(animate);
 }
+
 
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
@@ -262,6 +422,7 @@ function adjustParticles() {
         // Видаляємо зайві частинки
         particles.splice(diff);
     }
+    makeBonds();
 }
 
 // Замість init() при зміні кількості частинок:
