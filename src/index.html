@@ -1,111 +1,84 @@
 <!DOCTYPE html>
-<html lang="ua">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Brownian Motion</title>
-    <link rel="stylesheet" href="styles/main.css" />
-  </head>
-  <body>
-    <div class="motion-menu">
-      <label style="margin-top: 8px">
-        <input type="checkbox" id="themeToggle" />
-        Темна тема
-      </label>
-      <label for="numParticles">Кількість частинок:</label>
-      <input
-        class="numParticles"
-        type="range"
-        min="100"
-        max="1000"
-        value="500"
-      />
-      <label for="temperature">Температура:</label>
-      <input class="temperature" type="range" min="0" max="1000" value="50" />
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particle Simulation</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Particle Simulation</h1>
+            <label class="theme-switch">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider"></span>
+                <span class="theme-label">Dark Mode</span>
+            </label>
+        </header>
 
-      <label for="environment">Навколишнє середовище:</label>
-      <select id="environment">
-        <option value="none">None</option>
-        <option value="gas">Газ</option>
-        <option value="liquid">Рідина</option>
-        <option value="solid">Тверде тіло</option>
-      </select>
-      
+        <div class="content">
+            <div class="controls">
+                <div class="control-group">
+                    <label for="numParticles">Number of Particles:</label>
+                    <input type="range" id="numParticles" min="100" max="5000" value="500" class="slider-control">
+                    <span id="numParticlesValue">500</span>
+                </div>
 
-      <div class="mass-menu">
-        <label style="font-weight: 500">Маса нової частинки:</label><br />
-        <label style="margin-right: 12px">
-          <input type="radio" name="mass" value="" checked />
-          Ніяка(Поштовх)
-        </label>
-        <label style="margin-right: 12px">
-          <input type="radio" name="mass" value="3" />
-          Мала
-        </label>
-        <label style="margin-right: 12px">
-          <input type="radio" name="mass" value="6" />
-          Середня
-        </label>
-        <label>
-          <input type="radio" name="mass" value="10" />
-          Велика
-        </label>
-      </div>
-      <div class="push-menu" style="display: none">
-        <label for="pushStrength">Сила поштовху:</label>
-        <input
-          id="pushStrength"
-          type="range"
-          min="-3"
-          max="3"
-          step="0.05"
-          value="0.75"
-        />
-        <span id="pushStrengthValue">0.75</span>
-        <br />
-        <label for="pushRadius">Радіус поштовху:</label>
-        <input
-          id="pushRadius"
-          type="range"
-          min="20"
-          max="200"
-          step="1"
-          value="80"
-        />
-        <span id="pushRadiusValue">80</span>
-      </div>
+                <div class="control-group">
+                    <label for="temperature">Temperature:</label>
+                    <input type="range" id="temperature" min="0" max="10000" value="50" class="slider-control">
+                    <span id="temperatureValue">50</span>
+                </div>
 
-      <button class="pause-btn">⏸ Пауза</button>
+                <div class="control-group">
+                    <label>Environment:</label>
+                    <select id="environment">
+                        <option value="none">None</option>
+                        <option value="gas">Gas</option>
+                        <option value="liquid">Liquid</option>
+                        <option value="solid">Solid</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Particle Mass:</label>
+                    <div class="mass-menu">
+                        <label><input type="radio" name="mass" value="" checked> None</label>
+                        <label><input type="radio" name="mass" value="3"> Small</label>
+                        <label><input type="radio" name="mass" value="6"> Medium</label>
+                        <label><input type="radio" name="mass" value="10"> Large</label>
+                    </div>
+                </div>
+
+                <div class="control-group push-menu">
+                    <label for="pushStrength">Push Strength:</label>
+                    <input type="range" id="pushStrength" min="0.1" max="5" step="0.1" value="1" class="slider-control">
+                    <span id="pushStrengthValue">1</span>
+                </div>
+
+                <div class="control-group push-menu">
+                    <label for="pushRadius">Push Radius:</label>
+                    <input type="range" id="pushRadius" min="50" max="500" value="150" class="slider-control">
+                    <span id="pushRadiusValue">150</span>
+                </div>
+
+                <div class="control-group button-group">
+                    <button class="pause-btn">⏸ Pause</button>
+                    <button class="reset-btn">🔄 Reset</button>
+                    <button class="hide-content-btn">📋 Hide Controls</button>
+                </div>
+            </div>
+        </div>
+        <div class="stats">
+            <div>Particles: <span id="particleCount">0</span></div>
+            <div>Temperature: <span id="currentTemperature">0</span></div>
+            <div>Bonds: <span id="bondCount">0</span></div>
+            <div>FPS: <span id="fps">0</span></div>
+        </div>
+        <button class="show-content-btn" style="display: none;">📋 Show Controls</button>
     </div>
-    <div class="content">
-      <h1>Броунівський Рух</h1>
-      <button class="hide-content-btn">Сховати інформацію</button>
-      <section>
-        <h2>Що таке броунівський рух?</h2>
-        <p>
-          Броунівський рух - це випадковий рух частинок, що знаходяться в рідині
-          (рідина або газ), внаслідок їх зіткнення з швидко рухомими молекулами
-          в рідині.
-        </p>
-      </section>
-      <section>
-        <h2>Історія</h2>
-        <p>
-          Вперше спостережений ботаніком Робертом Броуном у 1827 році,
-          броунівський рух став ключовим доказом існування атомів і молекул.
-        </p>
-      </section>
-      <section>
-        <h2>Застосування</h2>
-        <p>
-          Броунівський рух є фундаментальним у фізиці, хімії та фінансах,
-          допомагаючи пояснити дифузію, коливання фондового ринку та інше.
-        </p>
-      </section>
-    </div>
-    <button class="show-content-btn" style="display: none">
-      Показати інформацію
-    </button>
 
-    <script src="scripts/brownian.js"></script>
-  </body>
+    <script type="module" src="js/main.js"></script>
+</body>
 </html>
