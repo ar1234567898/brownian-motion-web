@@ -5,6 +5,8 @@ export class Particle {
         this.size = size;
         this.speedX = 0;
         this.speedY = 0;
+        // Initialize with random speed
+        this.setRandomSpeed(0.5 + (50 / 100) * 2.5); // Default temperature 50
     }
 
     setRandomSpeed(baseSpeed) {

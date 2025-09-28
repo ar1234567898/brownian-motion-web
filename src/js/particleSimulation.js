@@ -93,38 +93,49 @@ export class ParticleSimulation {
     }
 
     addParticle(x, y, size) {
-        this.particles.push(new Particle(x, y, size));
+        const particle = new Particle(x, y, size);
+        // Set speed based on current temperature
+        particle.setRandomSpeed(this.getBaseSpeed());
+        this.particles.push(particle);
         this.bondManager.createBonds(this.particles, this.config.environment);
+    }
+
+    getBaseSpeed() {
+        return 0.5 + (this.config.temperature / 100) * 2.5;
     }
 
     resetParticles() {
         this.particles = [];
+        const baseSpeed = this.getBaseSpeed();
+        
         for (let i = 0; i < this.config.numParticles; i++) {
             const randomSize = 3 + Math.random() * 3;
-            this.particles.push(
-                new Particle(
-                    Math.random() * this.canvas.width,
-                    Math.random() * this.canvas.height,
-                    randomSize
-                )
+            const particle = new Particle(
+                Math.random() * this.canvas.width,
+                Math.random() * this.canvas.height,
+                randomSize
             );
+            // Ensure proper speed initialization
+            particle.setRandomSpeed(baseSpeed);
+            this.particles.push(particle);
         }
         this.bondManager.createBonds(this.particles, this.config.environment);
     }
 
     adjustParticles() {
         const diff = this.config.numParticles - this.particles.length;
+        const baseSpeed = this.getBaseSpeed();
         
         if (diff > 0) {
             for (let i = 0; i < diff; i++) {
                 const randomSize = 3 + Math.random() * 3;
-                this.particles.push(
-                    new Particle(
-                        Math.random() * this.canvas.width,
-                        Math.random() * this.canvas.height,
-                        randomSize
-                    )
+                const particle = new Particle(
+                    Math.random() * this.canvas.width,
+                    Math.random() * this.canvas.height,
+                    randomSize
                 );
+                particle.setRandomSpeed(baseSpeed);
+                this.particles.push(particle);
             }
         } else if (diff < 0) {
             this.particles.splice(diff);
@@ -133,10 +144,14 @@ export class ParticleSimulation {
         this.bondManager.createBonds(this.particles, this.config.environment);
     }
 
-    updateParticleSpeeds() {
-        const baseSpeed = 0.5 + (this.config.temperature / 100) * 2.5;
-        this.particles.forEach(particle => particle.setRandomSpeed(baseSpeed));
-    }
+updateParticleSpeeds() {
+    const baseSpeed = this.getBaseSpeed();
+    this.particles.forEach(particle => {
+        // In solid state, temperature has less effect on movement
+        const speedMultiplier = this.config.environment === 'solid' ? 0.3 : 1.0;
+        particle.setRandomSpeed(baseSpeed * speedMultiplier);
+    });
+}
 
     pushParticlesFromCursor() {
         if (!this.mouse.down || this.config.selectedMass !== null) return;
@@ -189,42 +204,55 @@ export class ParticleSimulation {
         });
     }
 
-    animate() {
-        if (this.config.paused) {
-            requestAnimationFrame(() => this.animate());
-            return;
-        }
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // Update physics
-        this.pushParticlesFromCursor();
-        this.collisionSystem.handleCollisions(this.particles);
-        
-        // Update particles
-        const bounds = { width: this.canvas.width, height: this.canvas.height };
-        this.particles.forEach(particle => particle.update(bounds));
-        
-        // Update bonds
-        this.bondManager.cleanupBonds(this.particles);
-        this.bondManager.createBonds(this.particles, this.config.environment);
-        
-        if (this.config.environment === 'solid') {
-            this.bondManager.enforceSolidBonds();
-        }
-
-        // Draw everything
-        this.particles.forEach(particle => particle.draw(this.ctx));
-        this.bondManager.drawBonds(this.ctx);
-        
-        // Update statistics
-        this.updateStats();
-
+animate() {
+    if (this.config.paused) {
         requestAnimationFrame(() => this.animate());
+        return;
     }
+
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Update physics
+    this.pushParticlesFromCursor();
+    
+    // Apply bond forces before collision detection
+    if (this.config.environment === 'solid') {
+        this.bondManager.applyBondForces(this.config.environment);
+    }
+    
+    this.collisionSystem.handleCollisions(this.particles);
+    
+    // Update particles
+    const bounds = { width: this.canvas.width, height: this.canvas.height };
+    this.particles.forEach(particle => particle.update(bounds));
+    
+    // Update bonds
+    this.bondManager.cleanupBonds(this.particles);
+    this.bondManager.createBonds(this.particles, this.config.environment);
+    
+    // Enforce solid structure
+    if (this.config.environment === 'solid') {
+        this.bondManager.enforceSolidBonds();
+        
+        // Reduce particle speeds in solid state to simulate rigidity
+        this.particles.forEach(particle => {
+            particle.speedX *= 0.95;
+            particle.speedY *= 0.95;
+        });
+    }
+
+    // Draw everything
+    this.particles.forEach(particle => particle.draw(this.ctx));
+    this.bondManager.drawBonds(this.ctx);
+    
+    // Update statistics
+    this.updateStats();
+
+    requestAnimationFrame(() => this.animate());
+}
 
     togglePause() {
         this.config.paused = !this.config.paused;
         return this.config.paused;
     }
-}   
+}
