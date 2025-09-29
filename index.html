@@ -63,6 +63,46 @@
                     <span id="pushRadiusValue">150</span>
                 </div>
 
+                <h2>Glow Controls</h2>
+                
+                <div class="control-group">
+                    <h3>Brightness</h3>
+                    <div class="slider-container">
+                        <label for="brightness">Intensity: <span id="brightness-value">70%</span></label>
+                        <input type="range" id="brightness" min="0" max="100" value="70">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>Color</h3>
+                    <div class="color-picker">
+                        <div class="color-option active" style="background-color: #0077ff;" data-color="#0077ff"></div>
+                        <div class="color-option" style="background-color: #ff00aa;" data-color="#ff00aa"></div>
+                        <div class="color-option" style="background-color: #00ffaa;" data-color="#00ffaa"></div>
+                        <div class="color-option" style="background-color: #ffaa00;" data-color="#ffaa00"></div>
+                        <div class="color-option" style="background-color: #aa00ff;" data-color="#aa00ff"></div>
+                    </div>
+                    <div class="slider-container">
+                        <label for="hue">Hue: <span id="hue-value">210°</span></label>
+                        <input type="range" id="hue" min="0" max="360" value="210">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>Saturation</h3>
+                    <div class="slider-container">
+                        <label for="saturation">Vibrancy: <span id="saturation-value">80%</span></label>
+                        <input type="range" id="saturation" min="0" max="100" value="80">
+                    </div>
+                </div>
+
+                <div class="preview" id="glow-preview">
+                    Glow Preview
+                </div>
+
+                <button class="reset-btn" id="reset-btn">Reset to Default</button>
+            </div>
+
                 <div class="control-group button-group">
                     <button class="pause-btn">⏸ Pause</button>
                     <button class="reset-btn">🔄 Reset</button>

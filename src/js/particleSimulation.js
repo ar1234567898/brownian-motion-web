@@ -256,3 +256,4 @@ animate() {
         return this.config.paused;
     }
 }
+

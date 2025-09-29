@@ -225,3 +225,52 @@ canvas {
         font-size: 0.8rem;
     }
 }
+
+.glow-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.glow-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
+}
+
+body.dark .glow-controls {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.color-picker {
+    width: 100%;
+    height: 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.glow-preview {
+    padding: 0.5rem;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .glow-controls {
+        padding: 0.3rem;
+    }
+    
+    .glow-preview {
+        font-size: 0.7rem;
+    }
+}
