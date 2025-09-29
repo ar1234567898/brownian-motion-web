@@ -1,124 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Particle Simulation</title>
-    <link rel="stylesheet" href="src/styles/main.css">
-</head>
-<body>
+    <link rel="stylesheet" href="src/styles/main.css" />
+  </head>
+  <body>
     <div class="container">
-        <header class="header">
-            <h1>Particle Simulation</h1>
-            <label class="theme-switch">
-                <input type="checkbox" id="themeToggle">
-                <span class="slider"></span>
-                <span class="theme-label">Dark Mode</span>
+      <header class="header">
+        <h1>Particle Simulation</h1>
+        <label class="theme-switch">
+          <input type="checkbox" id="themeToggle" />
+          <span class="slider"></span>
+          <span class="theme-label">Dark Mode</span>
+        </label>
+      </header>
+
+      <div class="content">
+        <div class="controls">
+          <div class="control-group">
+            <label for="numParticles">Number of Particles:</label>
+            <input
+              type="range"
+              id="numParticles"
+              min="10"
+              max="2000"
+              value="500"
+              class="slider-control"
+            />
+            <span id="numParticlesValue" class="slider-value">500</span>
+          </div>
+
+          <div class="control-group">
+            <label for="temperature">Temperature:</label>
+            <input
+              type="range"
+              id="temperature"
+              min="0"
+              max="100"
+              value="50"
+              class="slider-control"
+            />
+            <span id="temperatureValue" class="slider-value">50</span>
+          </div>
+
+          <div class="control-group">
+            <label>Environment:</label>
+            <select id="environment">
+              <option value="none">None</option>
+              <option value="gas">Gas</option>
+              <option value="liquid">Liquid</option>
+              <option value="solid">Solid</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Particle Mass:</label>
+            <div class="mass-menu">
+              <label
+                ><input type="radio" name="mass" value="" checked /> None</label
+              >
+              <label><input type="radio" name="mass" value="3" /> Small</label>
+              <label><input type="radio" name="mass" value="6" /> Medium</label>
+              <label><input type="radio" name="mass" value="10" /> Large</label>
+            </div>
+          </div>
+
+          <div class="control-group push-menu">
+            <label for="pushStrength">Push Strength:</label>
+            <input
+              type="range"
+              id="pushStrength"
+              min="0.1"
+              max="5"
+              step="0.1"
+              value="1"
+              class="slider-control"
+            />
+            <span id="pushStrengthValue" class="slider-value">1.0</span>
+          </div>
+
+          <div class="control-group push-menu">
+            <label for="pushRadius">Push Radius:</label>
+            <input
+              type="range"
+              id="pushRadius"
+              min="50"
+              max="500"
+              value="150"
+              class="slider-control"
+            />
+            <span id="pushRadiusValue" class="slider-value">150</span>
+          </div>
+
+          <!-- New Glow Effect Controls -->
+          <div class="control-group">
+            <label class="glow-toggle">
+              <input type="checkbox" id="glowToggle" checked />
+              <span class="glow-label">Glow Effect</span>
             </label>
-        </header>
 
-        <div class="content">
-            <div class="controls">
-                <div class="control-group">
-                    <label for="numParticles">Number of Particles:</label>
-                    <input type="range" id="numParticles" min="100" max="1000" value="500" class="slider-control">
-                    <span id="numParticlesValue">500</span>
-                </div>
+            <div class="glow-controls">
+              <label for="glowIntensity">Glow Intensity:</label>
+              <input
+                type="range"
+                id="glowIntensity"
+                min="0"
+                max="1"
+                step="0.1"
+                value="0.8"
+                class="slider-control"
+              />
+              <span id="glowIntensityValue" class="slider-value">0.8</span>
 
-                <div class="control-group">
-                    <label for="temperature">Temperature:</label>
-                    <input type="range" id="temperature" min="0" max="1000" value="50" class="slider-control">
-                    <span id="temperatureValue">50</span>
-                </div>
-
-                <div class="control-group">
-                    <label>Environment:</label>
-                    <select id="environment">
-                        <option value="none">None</option>
-                        <option value="gas">Gas</option>
-                        <option value="liquid">Liquid</option>
-                        <option value="solid">Solid</option>
-                    </select>
-                </div>
-
-                <div class="control-group">
-                    <label>Particle Mass:</label>
-                    <div class="mass-menu">
-                        <label><input type="radio" name="mass" value="" checked> None</label>
-                        <label><input type="radio" name="mass" value="3"> Small</label>
-                        <label><input type="radio" name="mass" value="6"> Medium</label>
-                        <label><input type="radio" name="mass" value="10"> Large</label>
-                    </div>
-                </div>
-
-                <div class="control-group push-menu">
-                    <label for="pushStrength">Push Strength:</label>
-                    <input type="range" id="pushStrength" min="-5" max="5" step="0.1" value="1" class="slider-control">
-                    <span id="pushStrengthValue">1</span>
-                </div>
-
-                <div class="control-group push-menu">
-                    <label for="pushRadius">Push Radius:</label>
-                    <input type="range" id="pushRadius" min="50" max="500" value="150" class="slider-control">
-                    <span id="pushRadiusValue">150</span>
-                </div>
-
-                <h2>Glow Controls</h2>
-                
-                <div class="control-group">
-                    <h3>Brightness</h3>
-                    <div class="slider-container">
-                        <label for="brightness">Intensity: <span id="brightness-value">70%</span></label>
-                        <input type="range" id="brightness" min="0" max="100" value="70">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <h3>Color</h3>
-                    <div class="color-picker">
-                        <div class="color-option active" style="background-color: #0077ff;" data-color="#0077ff"></div>
-                        <div class="color-option" style="background-color: #ff00aa;" data-color="#ff00aa"></div>
-                        <div class="color-option" style="background-color: #00ffaa;" data-color="#00ffaa"></div>
-                        <div class="color-option" style="background-color: #ffaa00;" data-color="#ffaa00"></div>
-                        <div class="color-option" style="background-color: #aa00ff;" data-color="#aa00ff"></div>
-                    </div>
-                    <div class="slider-container">
-                        <label for="hue">Hue: <span id="hue-value">210°</span></label>
-                        <input type="range" id="hue" min="0" max="360" value="210">
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <h3>Saturation</h3>
-                    <div class="slider-container">
-                        <label for="saturation">Vibrancy: <span id="saturation-value">80%</span></label>
-                        <input type="range" id="saturation" min="0" max="100" value="80">
-                    </div>
-                </div>
-
-                <div class="preview" id="glow-preview">
-                    Glow Preview
-                </div>
-
-                <button class="reset-btn" id="reset-btn">Reset to Default</button>
+              <label for="glowColor">Glow Color:</label>
+              <input
+                type="color"
+                id="glowColor"
+                value="#ffffff"
+                class="color-picker"
+              />
+              <div id="glowPreview" class="glow-preview">Preview</div>
             </div>
+          </div>
 
-                <div class="control-group button-group">
-                    <button class="pause-btn">⏸ Pause</button>
-                    <button class="reset-btn">🔄 Reset</button>
-                    <button class="hide-content-btn">📋 Hide Controls</button>
-                </div>
-            </div>
+          <div class="control-group button-group">
+            <button class="pause-btn">⏸ Pause</button>
+            <button class="reset-btn">🔄 Reset</button>
+            <button class="hide-content-btn">📋 Hide Controls</button>
+          </div>
         </div>
-        <div class="stats">
-            <div>Particles: <span id="particleCount">0</span></div>
-            <div>Temperature: <span id="currentTemperature">0</span></div>
-            <div>Bonds: <span id="bondCount">0</span></div>
-            <div>FPS: <span id="fps">0</span></div>
-        </div>
-        <button class="show-content-btn" style="display: none;">📋 Show Controls</button>
+      </div>
+      <div class="stats">
+        <div>Particles: <span id="particleCount">0</span></div>
+        <div>Temperature: <span id="currentTemperature">0</span></div>
+        <div>Bonds: <span id="bondCount">0</span></div>
+        <div>FPS: <span id="fps">0</span></div>
+      </div>
+      <button class="show-content-btn" style="display: none">
+        📋 Show Controls
+      </button>
     </div>
 
     <script type="module" src="src/js/main.js"></script>
-</body>
+  </body>
 </html>

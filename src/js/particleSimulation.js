@@ -4,6 +4,7 @@ import { CollisionSystem } from './CollisionSystem.js';
 import { UIManager } from './UIManager.js';
 
 export class ParticleSimulation {
+
     constructor() {
         this.canvas = document.createElement('canvas');
         this.ctx = this.canvas.getContext('2d');
@@ -205,51 +206,62 @@ updateParticleSpeeds() {
     }
 
 animate() {
-    if (this.config.paused) {
-        requestAnimationFrame(() => this.animate());
-        return;
-    }
+        if (this.config.paused) {
+            requestAnimationFrame(() => this.animate());
+            return;
+        }
 
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Update physics
-    this.pushParticlesFromCursor();
-    
-    // Apply bond forces before collision detection
-    if (this.config.environment === 'solid') {
-        this.bondManager.applyBondForces(this.config.environment);
-    }
-    
-    this.collisionSystem.handleCollisions(this.particles);
-    
-    // Update particles
-    const bounds = { width: this.canvas.width, height: this.canvas.height };
-    this.particles.forEach(particle => particle.update(bounds));
-    
-    // Update bonds
-    this.bondManager.cleanupBonds(this.particles);
-    this.bondManager.createBonds(this.particles, this.config.environment);
-    
-    // Enforce solid structure
-    if (this.config.environment === 'solid') {
-        this.bondManager.enforceSolidBonds();
+        // Update physics
+        this.pushParticlesFromCursor();
         
-        // Reduce particle speeds in solid state to simulate rigidity
-        this.particles.forEach(particle => {
-            particle.speedX *= 0.95;
-            particle.speedY *= 0.95;
-        });
+        // Apply bond forces before collision detection
+        if (this.config.environment === 'solid') {
+            this.bondManager.applyBondForces(this.config.environment);
+        }
+        
+        this.collisionSystem.handleCollisions(this.particles);
+        
+        // Update particles
+        const bounds = { width: this.canvas.width, height: this.canvas.height };
+        this.particles.forEach(particle => particle.update(bounds));
+        
+        // Update bonds
+        this.bondManager.cleanupBonds(this.particles);
+        this.bondManager.createBonds(this.particles, this.config.environment);
+        
+        // Enforce solid structure
+        if (this.config.environment === 'solid') {
+            this.bondManager.enforceSolidBonds();
+            
+            // Reduce particle speeds in solid state to simulate rigidity
+            this.particles.forEach(particle => {
+                particle.speedX *= 0.95;
+                particle.speedY *= 0.95;
+            });
+        }
+
+        // Draw everything with glow effect
+        this.particles.forEach(particle => 
+            particle.draw(this.ctx, this.config.glowEnabled, this.config.glowIntensity)
+        );
+        this.bondManager.drawBonds(this.ctx);
+        
+        // Update statistics
+        this.updateStats();
+
+        requestAnimationFrame(() => this.animate());
     }
 
-    // Draw everything
-    this.particles.forEach(particle => particle.draw(this.ctx));
-    this.bondManager.drawBonds(this.ctx);
-    
-    // Update statistics
-    this.updateStats();
+    // Add methods for glow effect control
+    setGlowEnabled(enabled) {
+        this.config.glowEnabled = enabled;
+    }
 
-    requestAnimationFrame(() => this.animate());
-}
+    setGlowIntensity(intensity) {
+        this.config.glowIntensity = Math.max(0, Math.min(1, intensity));
+    }
 
     togglePause() {
         this.config.paused = !this.config.paused;
