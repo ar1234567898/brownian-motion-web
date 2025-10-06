@@ -40,24 +40,19 @@ export class Particle {
         }
     }
 
-draw(ctx, withGlow = false) {
-        if (withGlow) {
-            // This is now handled by the simulation's drawParticleGlow method
-            return;
-        }
-
-        // Draw solid particle
-        ctx.fillStyle = this.getColor();
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Add a subtle highlight
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.beginPath();
-        ctx.arc(this.x - this.size * 0.3, this.y - this.size * 0.3, this.size * 0.4, 0, Math.PI * 2);
-        ctx.fill();
-    }
+draw(ctx) {
+    // Draw solid particle
+    ctx.fillStyle = this.getColor();
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Add a subtle highlight
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.beginPath();
+    ctx.arc(this.x - this.size * 0.3, this.y - this.size * 0.3, this.size * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+}
 
     getColor() {
         if (this.size < 4) return "#2196f3"; // Small - blue
@@ -146,35 +141,37 @@ draw(ctx, withGlow = false) {
     }
 
     drawParticleGlow(particle) {
-        const ctx = this.ctx;
-        const intensity = this.config.glowIntensity;
-        
-        // Create radial gradient for glow
-        const gradient = ctx.createRadialGradient(
-            particle.x, particle.y, 0,
-            particle.x, particle.y, particle.size * (2 + intensity * 3)
-        );
-        
-        const baseColor = particle.getColor();
-        const rgb = this.hexToRgb(baseColor);
-        
-        gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${intensity * 0.8})`);
-        gradient.addColorStop(0.5, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${intensity * 0.3})`);
-        gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)`);
-        
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size * (2 + intensity * 3), 0, Math.PI * 2);
-        ctx.fill();
-    }
+    const ctx = this.ctx;
+    const intensity = this.config.glowIntensity ?? 0.8;
+    const color = this.config.glowColor || particle.getColor();
 
-    hexToRgb(hex) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
-        } : { r: 255, g: 255, b: 255 };
-    }
+    // Convert color to rgb
+    const rgb = this.hexToRgb(color);
+
+    const gradient = ctx.createRadialGradient(
+        particle.x, particle.y, 0,
+        particle.x, particle.y, particle.size * (2 + intensity * 3)
+    );
+    gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${intensity * 0.8})`);
+    gradient.addColorStop(0.5, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${intensity * 0.3})`);
+    gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)`);
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(particle.x, particle.y, particle.size * (2 + intensity * 3), 0, Math.PI * 2);
+    ctx.fill();
+}
+
+hexToRgb(hex) {
+    // Accepts #RRGGBB or #RGB
+    let c = hex.substring(1);
+    if (c.length === 3) c = c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
+    const num = parseInt(c, 16);
+    return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+    };
+}
 
 }
