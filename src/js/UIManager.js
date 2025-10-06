@@ -9,18 +9,49 @@ export class UIManager {
         this.setupEventListeners();
         this.setupTheme();
         this.setupGlowControls();
-        this.initializeSliderValues();
     }
 
     cacheElements() {
         this.elements = {
-            // ... existing elements ...
-            // Make sure glow elements are included
-            glowToggle: document.getElementById("glowToggle"),
-            glowIntensity: document.getElementById("glowIntensity"),
-            glowIntensityValue: document.getElementById("glowIntensityValue"),
-            glowColor: document.getElementById("glowColor"),
-            glowPreview: document.getElementById("glowPreview")
+            // Sliders
+            numParticles: document.getElementById("numParticles"),
+            temperature: document.getElementById("temperature"),
+            pushStrength: document.getElementById("pushStrength"),
+            pushRadius: document.getElementById("pushRadius"),
+
+            // Display values
+            numParticlesValue: document.getElementById("numParticlesValue"),
+            temperatureValue: document.getElementById("temperatureValue"),
+            pushStrengthValue: document.getElementById("pushStrengthValue"),
+            pushRadiusValue: document.getElementById("pushRadiusValue"),
+
+            // Selects and radios
+            environment: document.getElementById("environment"),
+            massInputs: document.querySelectorAll('input[name="mass"]'),
+            themeToggle: document.getElementById("themeToggle"),
+
+            // Buttons
+            pauseBtn: document.querySelector(".pause-btn"),
+            resetBtn: document.querySelector(".reset-btn"),
+            hideBtn: document.querySelector(".hide-content-btn"),
+            showBtn: document.querySelector(".show-content-btn"),
+
+            // Stats
+            particleCount: document.getElementById("particleCount"),
+            currentTemperature: document.getElementById("currentTemperature"),
+            bondCount: document.getElementById("bondCount"),
+            fps: document.getElementById("fps"),
+
+            // UI containers
+            content: document.querySelector(".content"),
+            pushMenu: document.querySelector(".push-menu"),
+
+            // Glow effect elements
+            glowToggle: document.getElementById('glowToggle'),
+            glowIntensity: document.getElementById('glowIntensity'),
+            glowIntensityValue: document.getElementById('glowIntensityValue'),
+            glowColor: document.getElementById('glowColor'),
+            glowPreview: document.getElementById('glowPreview')
         };
     }
 
@@ -29,14 +60,13 @@ export class UIManager {
         if (!this.elements.glowToggle) {
             this.createGlowControls();
         }
-        this.setupGlowEventListeners();
-        this.updateGlowPreview();
     }
 
     createGlowControls() {
         const controlsContainer = document.querySelector('.controls');
         if (!controlsContainer) return;
-        
+
+        // Create glow control group
         const glowGroup = document.createElement('div');
         glowGroup.className = 'control-group';
         glowGroup.innerHTML = `
@@ -44,63 +74,59 @@ export class UIManager {
                 <input type="checkbox" id="glowToggle" checked>
                 <span class="glow-label">Glow Effect</span>
             </label>
-            
             <div class="glow-controls">
                 <label for="glowIntensity">Glow Intensity:</label>
                 <input type="range" id="glowIntensity" min="0" max="1" step="0.1" value="0.8" class="slider-control">
-                <span id="glowIntensityValue" class="slider-value">0.8</span>
-                
-                <label for="glowColor">Glow Color Override:</label>
+                <span id="glowIntensityValue">0.8</span>
+                <label for="glowColor">Glow Color:</label>
                 <input type="color" id="glowColor" value="#ffffff" class="color-picker">
-                <div id="glowPreview" class="glow-preview">Glow Preview</div>
+                <div id="glowPreview" class="glow-preview">Preview</div>
             </div>
         `;
-        
         controlsContainer.appendChild(glowGroup);
-        this.cacheElements(); // Re-cache to include new elements
+
+        // Re-cache elements to include new ones
+        this.cacheElements();
+        this.setupGlowEventListeners();
     }
 
     setupGlowEventListeners() {
-        if (this.elements.glowToggle) {
-            this.elements.glowToggle.addEventListener('change', (e) => {
-                this.simulation.setGlowEnabled(e.target.checked);
-            });
-        }
+        if (!this.elements.glowToggle) return;
 
-        if (this.elements.glowIntensity) {
-            this.elements.glowIntensity.addEventListener('input', (e) => {
-                const intensity = parseFloat(e.target.value);
-                if (this.elements.glowIntensityValue) {
-                    this.elements.glowIntensityValue.textContent = intensity.toFixed(1);
-                }
-                this.simulation.setGlowIntensity(intensity);
-                this.updateGlowPreview();
-            });
-        }
+        // Glow toggle
+        this.elements.glowToggle.addEventListener('change', (e) => {
+            this.simulation.setGlowEnabled(e.target.checked);
+        });
 
-        if (this.elements.glowColor) {
-            this.elements.glowColor.addEventListener('input', (e) => {
-                this.updateGlowPreview();
-            });
-        }
+        // Glow intensity
+        this.elements.glowIntensity.addEventListener('input', (e) => {
+            const intensity = parseFloat(e.target.value);
+            this.elements.glowIntensityValue.textContent = intensity.toFixed(1);
+            this.simulation.setGlowIntensity(intensity);
+            this.updateGlowPreview();
+        });
+
+        // Glow color
+        this.elements.glowColor.addEventListener('input', (e) => {
+            this.updateGlowPreview();
+        });
     }
 
     updateGlowPreview() {
-        if (!this.elements.glowPreview || !this.elements.glowColor || !this.elements.glowIntensity) return;
-        
+        if (!this.elements.glowPreview) return;
+
         const color = this.elements.glowColor.value;
         const intensity = parseFloat(this.elements.glowIntensity.value);
-        const rgb = this.hexToRgb(color);
-        
-        const gradient = `linear-gradient(90deg, 
-            rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${intensity}), 
-            rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)
-        )`;
-        
-        this.elements.glowPreview.style.background = gradient;
-        this.elements.glowPreview.textContent = `Intensity: ${intensity.toFixed(1)}`;
+
+        // Create gradient preview
+        const rgbColor = this.hexToRgb(color);
+        const rgbaColor = `rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${intensity})`;
+
+        this.elements.glowPreview.style.background = `linear-gradient(90deg, ${rgbaColor}, transparent)`;
+        this.elements.glowPreview.style.color = this.getContrastColor(rgbColor.r, rgbColor.g, rgbColor.b);
     }
 
+    // Color conversion utilities
     hexToRgb(hex) {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? {
@@ -237,17 +263,11 @@ export class UIManager {
     }
 
     updateStats(stats) {
-        if (this.elements.particleCount) {
-            this.elements.particleCount.textContent = stats.particleCount;
-        }
-        if (this.elements.currentTemperature) {
-            this.elements.currentTemperature.textContent = stats.temperature;
-        }
-        if (this.elements.bondCount) {
-            this.elements.bondCount.textContent = stats.bondCount;
-        }
-        if (this.elements.fps) {
-            this.elements.fps.textContent = stats.fps;
-        }
+        if (this.elements.particleCount) this.elements.particleCount.textContent = stats.particleCount;
+        if (this.elements.currentTemperature) this.elements.currentTemperature.textContent = stats.temperature;
+        if (this.elements.bondCount) this.elements.bondCount.textContent = stats.bondCount;
+        if (this.elements.fps) this.elements.fps.textContent = stats.fps;
     }
 }
+
+
